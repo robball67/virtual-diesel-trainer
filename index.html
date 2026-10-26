@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Virtual Diesel Trainer</title>
+<meta name="description" content="Interactive 3D trainer for a four-cylinder marine diesel with saildrive: parts, service schedule, fault finder, practice faults and guided jobs.">
+<meta name="theme-color" content="#c8551b">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Diesel Trainer">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="src/styles.css">
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.module.js",
+  "three/examples/jsm/":"https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/"
+}}
+</script>
+<script type="module" src="src/main.js"></script>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>Virtual Diesel Trainer</h1>
+    <span class="sub">Four-cylinder marine diesel with saildrive. Stylised training model, not to scale.</span>
+    <div class="hdr-actions">
+      <button id="bInstall" hidden>Install app</button>
+      <button id="bTheme">Theme: Auto</button>
+    </div>
+  </header>
+
+  <div class="stagewrap">
+    <div id="stage"></div>
+    <div id="nogl" hidden>3D could not start in this browser. The Service and Faults tabs still work.</div>
+    <div class="tools">
+      <button id="bXray" aria-pressed="false">X-ray</button>
+      <button id="bSnd" aria-pressed="true">Sound on</button>
+      <button id="bRun" aria-pressed="false">Run engine</button>
+      <label class="slider" for="explode">Explode <input id="explode" type="range" min="0" max="100" value="0"></label>
+      <button id="bReset">Reset view</button>
+    </div>
+    <div class="sys" id="sys"></div>
+  </div>
+
+  <aside>
+    <div class="tabs" role="tablist">
+      <button role="tab" id="tPart" aria-selected="true">Part</button>
+      <button role="tab" id="tSvc" aria-selected="false">Service</button>
+      <button role="tab" id="tFault" aria-selected="false">Faults</button>
+      <button role="tab" id="tPrac" aria-selected="false">Practice</button>
+      <button role="tab" id="tJob" aria-selected="false">Jobs</button>
+    </div>
+    <div class="pane" id="pPart"></div>
+    <div class="pane" id="pSvc" hidden></div>
+    <div class="pane" id="pFault" hidden></div>
+    <div class="pane" id="pPrac" hidden></div>
+    <div class="pane" id="pJob" hidden></div>
+  </aside>
+</div>
+<noscript><p style="padding:16px">This trainer needs JavaScript.</p></noscript>
+</body>
+</html>
