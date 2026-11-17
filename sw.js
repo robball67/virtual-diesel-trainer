@@ -1,6 +1,6 @@
 /* Offline support. App files are network-first (always fresh when online),
    CDN files (three.js, fonts) are cache-first since their URLs are versioned. Bump VERSION on release. */
-var VERSION="vdt-v1";
+var VERSION="vdt-v2";
 var SHELL=["./","index.html","manifest.webmanifest","src/styles.css","src/main.js","src/shell.js","src/store.js","src/audio.js",
   "src/data/engine.js","src/data/faults.js","src/data/scenarios.js","src/data/jobs.js",
   "icons/icon.svg","icons/icon-180.png","icons/icon-192.png","icons/icon-512.png","icons/icon-maskable-512.png"];

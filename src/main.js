@@ -1024,6 +1024,91 @@ g.children.slice().forEach(function(c){c.position.x-=0.7;c.position.y+=0.30;PSPI
   dm(geo,[0.57,0.1,0]);
 })();
 
+/* ---- casting detail on block, head and sump ---- */
+(function(){
+  var b=groups.block,h=groups.head,s=groups.sump;
+  [1,-1].forEach(function(sd){
+    /* vertical stiffening ribs between the cylinders */
+    [-0.14,0,0.14].forEach(function(x){add(b,rbox(0.014,0.24,0.012,0.004),GREENL,[x,0.30,sd*0.146])});
+    /* main bearing line: raised skirt rail with cap bolt heads */
+    add(b,rbox(0.58,0.012,0.008,0.003),GREENL,[0,0.19,sd*0.144]);
+    [-0.28,-0.14,0,0.14,0.28].forEach(function(x){bolt(b,[x,0.175,sd*0.145],AZ,0.0075,0.008)});
+    /* sump side ribs */
+    [-0.18,-0.06,0.06,0.18].forEach(function(x){add(s,rbox(0.012,0.085,0.008,0.003),GREENL,[x,0.085,sd*0.118])});
+  });
+  /* timing cover: bolts round the front plate and a crankshaft seal boss */
+  [0.17,0.25,0.33,0.40].forEach(function(y){[1,-1].forEach(function(sd){bolt(b,[-0.333,y,sd*0.112],AX,0.0055,0.006)})});
+  [-0.06,0.06].forEach(function(z){bolt(b,[-0.333,0.165,z],AX,0.0055,0.006);bolt(b,[-0.333,0.405,z],AX,0.0055,0.006)});
+  add(b,cyl(0.04,0.01),GREENL,[-0.335,0.20,0],AX);
+  /* engine identification plate, riveted to the block */
+  (function(){var c=document.createElement("canvas");c.width=256;c.height=144;var x=c.getContext("2d");
+    x.fillStyle="#c9ced2";x.fillRect(0,0,256,144);x.strokeStyle="#5d666c";x.lineWidth=5;x.strokeRect(10,10,236,124);
+    x.fillStyle="#2a3135";x.font="700 26px Arial, Helvetica, sans-serif";x.textAlign="left";x.textBaseline="middle";
+    x.fillText("ENGINE No.",24,46);x.fillText("PROD No.",24,98);
+    x.font="400 26px 'Courier New', monospace";x.fillText("2260 418",132,46);x.fillText("8691 02",132,98);
+    [[18,18],[238,18],[18,126],[238,126]].forEach(function(p){x.beginPath();x.arc(p[0],p[1],5,0,7);x.fill()});
+    var tx=new T.CanvasTexture(c);tx.encoding=T.sRGBEncoding;tx.anisotropy=4;
+    var pm=new T.Mesh(new T.PlaneGeometry(0.08,0.045),new T.MeshStandardMaterial({map:tx,roughness:0.4,metalness:0.6,transparent:true}));
+    pm.position.set(0.07,0.333,0.1505);pm.userData.c="#ffffff";b.add(pm)})();
+
+  /* head gasket line between block and head */
+  add(h,rbox(0.604,0.0035,0.284,0.001),BLACK,[0,0.4505,0]);
+  /* lifting eyes, front and rear */
+  [[-0.305,-0.06],[0.305,0]].forEach(function(p){
+    add(h,rbox(0.01,0.07,0.05,0.003),GREEN,[p[0],0.53,p[1]]);
+    add(h,new T.TorusGeometry(0.017,0.005,8,24),GREEN,[p[0],0.58,p[1]],[0,Math.PI/2,0]);
+    var sx=p[0]<0?-1:1;[-0.015,0.015].forEach(function(dz){bolt(h,[p[0]+sx*0.007,0.51,p[1]+dz],AX,0.0055,0.006)})});
+  /* intake manifold: lower flange and bolts between the runners */
+  add(h,rbox(0.44,0.008,0.014,0.003),GREENL,[0,0.48,-0.168]);
+  [-0.14,0,0.14].forEach(function(x){bolt(h,[x,0.52,-0.176],AZ,0.0055,0.006)});
+  /* glow plugs below the manifold, joined by a bus wire that dips under the fuel filter head */
+  XS.forEach(function(x){
+    add(h,hex(0.0065,0.008),STEEL,[x,0.463,-0.134],AZ);
+    add(h,cyl(0.0038,0.012),STEEL,[x,0.463,-0.143],AZ);
+    add(h,hex(0.0045,0.004),BRASS,[x,0.463,-0.151],AZ)});
+  hose(h,[[-0.21,0.463,-0.153],[-0.07,0.463,-0.153],[-0.035,0.462,-0.154],[-0.02,0.445,-0.154],[0.055,0.445,-0.154],[0.068,0.462,-0.154],[0.07,0.463,-0.153],[0.21,0.463,-0.153]],0.0018,{c:"#b87333",r:0.4,m:0.85});
+})();
+
+/* ---- fuel system detail ---- */
+(function(){
+  var ip=groups.injpump,inj=groups.injectors,fp=groups.fuelpump,ff=groups.fuelfilter;
+  var FUELH={c:"#262a2e",r:0.8,m:0}, WIRE={c:"#d8b02a",r:0.5,m:0};
+  /* injection pump: drive flange bolts, pump body under the barrel, inlet banjo */
+  [0,Math.PI/2,Math.PI].forEach(function(a){bolt(ip,[-0.283,0.355+0.034*Math.cos(a),-0.185+0.034*Math.sin(a)],AX,0.0045,0.006)});
+  add(ip,rbox(0.15,0.035,0.05,0.008),ALU,[-0.165,0.31,-0.185]);
+  [-0.22,-0.18,-0.14,-0.10].forEach(function(x){add(ip,cyl(0.0035,0.003),STEEL,[x,0.292,-0.185])});
+  add(ip,new T.TorusGeometry(0.009,0.0035,8,18),STEEL,[-0.11,0.355,-0.2245]);bolt(ip,[-0.11,0.355,-0.2275],AZ,0.006,0.008);
+  /* stop solenoid: connector and lead */
+  add(ip,rbox(0.018,0.012,0.022,0.003),BLACK,[-0.235,0.441,-0.2]);
+  hose(ip,[[-0.235,0.447,-0.2],[-0.24,0.47,-0.22],[-0.27,0.48,-0.25],[-0.3,0.45,-0.27],[-0.33,0.35,-0.27]],0.0028,WIRE);
+  /* throttle: cable bracket, outer sheath clamp and cable to the helm */
+  add(ip,rbox(0.006,0.03,0.05,0.002),STEEL,[-0.27,0.44,-0.245]);
+  add(ip,cyl(0.007,0.03),BLACK,[-0.27,0.445,-0.27],AZ);
+  hose(ip,[[-0.27,0.445,-0.285],[-0.27,0.44,-0.32],[-0.24,0.36,-0.35],[-0.18,0.2,-0.34],[-0.13,0.06,-0.29],[-0.12,-0.01,-0.27]],0.0055,BLACK);
+  /* hoses and cables leave the engine through rubber grommets in the bed */
+  function grommet(gr,x,z){add(gr,cyl(0.013,0.006),RUBBER,[x,0.0,z])}
+  grommet(ip,-0.12,-0.27);
+  add(ip,cyl(0.0018,0.05),STEEL,[-0.278,0.432,-0.235],[0.7,0,0]);
+
+  /* injectors: hold-down clamps and nuts, leak-off banjos, return hose to the tank */
+  XS.forEach(function(x){
+    add(inj,rbox(0.012,0.008,0.034,0.002),GREENL,[x-0.02,0.606,-0.118],[-0.3,0,0]);
+    add(inj,cyl(0.0035,0.02),STEEL,[x-0.02,0.612,-0.104],[-0.3,0,0]);
+    add(inj,hex(0.0055,0.006),STEEL,[x-0.02,0.616,-0.1],[-0.3,0,0]);
+    add(inj,cyl(0.0055,0.008),BRASS,[x,0.643,-0.142]);
+  });
+  hose(inj,[[0.22,0.64,-0.14],[0.245,0.62,-0.165],[0.252,0.52,-0.2],[0.248,0.36,-0.235],[0.25,0.2,-0.28],[0.285,0.06,-0.28],[0.29,-0.01,-0.27]],0.0045,FUELH);grommet(inj,0.29,-0.27);
+  clampAt(inj,[0.2495,0.56,-0.19],[0,1,0.25],0.006,0);
+
+  /* feed pump: inlet banjo and supply hose from the tank */
+  add(fp,new T.TorusGeometry(0.008,0.003,8,18),STEEL,[0.14,0.418,-0.172],[Math.PI/2,0,0]);bolt(fp,[0.14,0.413,-0.172],null,0.0055,0.008);
+  hose(fp,[[0.14,0.408,-0.18],[0.15,0.36,-0.21],[0.15,0.25,-0.28],[0.11,0.08,-0.285],[0.1,-0.01,-0.27]],0.0062,FUELH);grommet(fp,0.1,-0.27);
+
+  /* filter head: mounting bolts and in/out banjos */
+  [-0.02,0.06].forEach(function(x){bolt(ff,[x,0.485,-0.1395],AZ,0.005,0.006)});
+  [-0.025,0.063].forEach(function(x){add(ff,cyl(0.0075,0.012),BRASS,[x,0.488,-0.225],AX)});
+})();
+
 /* ---- internals (visible in X-ray) ---- */
 var R=0.03, ROD=0.15, PHI=[0,Math.PI,Math.PI,0], crank=new T.Group(), camsh=null;
 crank.position.set(0,0.20,0);rig.add(crank);
@@ -1066,6 +1151,54 @@ var pistons=[], rods=[];
     add(rig,rbox(0.014,0.008,0.075,0.003),STEEL,[x+dx,0.562,z*0.45+0.004*(j?1:-1)]);
   })});
   add(rig,cyl(0.006,0.52),STEEL,[0,0.572,0],AX);
+})();
+
+/* ---- internal detail ---- */
+var idler=null, GR_C=0.028, GR_I=0.05;
+(function(){
+  var DARK={c:"#4a4f53",r:0.7,m:0.4}, BRG={c:"#b88a4a",r:0.35,m:0.85}, OIL={c:"#b07a1e",r:0.2,m:0};
+  /* pistons: combustion bowl in the crown, pin bosses */
+  pistons.forEach(function(pg){
+    add(pg,lathe([[0,0.0455],[0.016,0.0455],[0.021,0.039],[0.018,0.034],[0,0.036]],28),DARK,[0,0,0],null,{ds:true});
+    [-0.03,0.03].forEach(function(dx){add(pg,cyl(0.014,0.012),ALU,[dx,0,0],AX)});
+  });
+  /* rods: I-beam flanges, small-end eye, big-end cap with bolts and bearing shell */
+  rods.forEach(function(rd){
+    [-0.0085,0.0085].forEach(function(dz){add(rd,rbox(0.018,ROD-0.05,0.004,0.0015),STEEL,[0,0,dz])});
+    add(rd,cyl(0.0135,0.02),STEEL,[0,ROD/2,0],AX);add(rd,cyl(0.0095,0.021),BRG,[0,ROD/2,0],AX);
+    add(rd,rbox(0.026,0.012,0.05,0.004),STEEL,[0,-ROD/2-0.017,0]);
+    add(rd,cyl(0.0145,0.027),BRG,[0,-ROD/2,0],AX);
+    [-0.019,0.019].forEach(function(dz){add(rd,cyl(0.0032,0.04),STEEL,[0,-ROD/2-0.004,dz]);bolt(rd,[0,-ROD/2-0.026,dz],null,0.0055,0.005)});
+  });
+  /* main bearing shells round each main journal */
+  [-0.28,-0.14,0,0.14,0.28].forEach(function(x){add(rig,new T.CylinderGeometry(0.0205,0.0205,0.03,24,1,true),BRG,[x,0.20,0],AX,{ds:true})});
+  /* timing gears at the front: crank gear, idler, camshaft gear at half speed */
+  function gear(grp,r,w,teeth,pos,p){
+    var gg=new T.Group();gg.position.fromArray(pos);grp.add(gg);
+    add(gg,cyl(r-0.003,w),p,[0,0,0],AX);
+    for(var k=0;k<teeth;k++){var a=k/teeth*Math.PI*2;add(gg,rbox(w,0.004,0.0035,0.0008),p,[0,(r-0.001)*Math.cos(a),(r-0.001)*Math.sin(a)],[a,0,0])}
+    add(gg,cyl(0.008,w+0.004),DARK,[0,0,0],AX);return gg}
+  gear(crank,GR_C,0.012,14,[-0.29,0,0],STEEL);
+  idler=gear(rig,GR_I,0.012,26,[-0.29,0.2751,-0.0214],BRASS);
+  var cg=gear(camsh,0.056,0.012,28,[-0.29,0,0],STEEL);
+  for(var k=0;k<4;k++){var a=k/4*Math.PI*2+0.4;add(cg,cyl(0.008,0.0125),DARK,[0,0.032*Math.cos(a),0.032*Math.sin(a)],AX)}
+  /* tappets and pushrods from the cam lobes up to the rockers */
+  XS.forEach(function(x){[-0.022,0.022].forEach(function(dx,j){
+    var xx=x+dx, a=new T.Vector3(xx,0.402,-0.085), b=new T.Vector3(xx,0.556,j?-0.01:0.01), d=b.clone().sub(a);
+    add(rig,cyl(0.0085,0.022),STEEL,[xx,0.391,-0.085]);
+    var pr=add(rig,cyl(0.003,d.length()),STEEL,[(a.x+b.x)/2,(a.y+b.y)/2,(a.z+b.z)/2]);pr.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),d.normalize());
+    add(rig,new T.SphereGeometry(0.0045,10,8),STEEL,[b.x,b.y,b.z]);
+    /* coil valve spring */
+    var z=j?0.038:-0.038,hp=[];for(var t=0;t<=96;t++){var u=t/96*Math.PI*2*6;hp.push(new T.Vector3(xx+0.0095*Math.cos(u),0.462+0.045*t/96,z+0.0095*Math.sin(u)))}
+    add(rig,new T.TubeGeometry(new T.CatmullRomCurve3(hp),120,0.0013,5,false),STEEL);
+  })});
+  /* rocker shaft pedestals */
+  [-0.245,-0.14,0,0.14,0.245].forEach(function(x){add(rig,rbox(0.014,0.03,0.022,0.003),CAST,[x,0.555,0])});
+  /* lubrication: oil in the sump, pickup strainer, pipe and oil pump */
+  add(rig,rbox(0.5,0.05,0.2,0.012),OIL,[0,0.065,0],null,{op:0.45});
+  add(rig,cyl(0.035,0.012),DARK,[-0.05,0.05,0]);add(rig,new T.TorusGeometry(0.035,0.002,6,28),STEEL,[-0.05,0.044,0],[Math.PI/2,0,0]);
+  add(rig,tube([[-0.05,0.056,0],[-0.05,0.09,0],[-0.12,0.112,-0.06],[-0.22,0.118,-0.09],[-0.265,0.135,-0.09]],0.0065,false,40),STEEL);
+  add(rig,rbox(0.05,0.04,0.05,0.008),CAST,[-0.27,0.15,-0.09]);
 })();
 
 /* state */
@@ -1149,6 +1282,7 @@ function crankAngle(a){
     rods[k].position.set(XS[k],(py+cy)/2,cz/2);rods[k].rotation.x=Math.atan2(dz,dy);
   }
   camsh.rotation.x=a/2;
+  if(idler)idler.rotation.x=-a*GR_C/GR_I;
 }
 var still=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches, last=performance.now();
 /* smoke and steam */
